@@ -151,6 +151,16 @@
     const toggleSide = ()=>{
         setSideMenu(!sidemenu);
     }
+    const handleLogOut = async() =>{
+        const {error} = await supabase.auth.signOut()
+         if (error) {
+      console.error('Error logging out:', error.message)
+    } else {
+      console.log('Logged out successfully!')
+      
+      window.location = './Login'
+    }
+    }
 
       return (
         <>
@@ -174,7 +184,8 @@
             </div>
 
           }
-        
+          <div className='logout'><button type="button" onClick={handleLogOut}>Logout</button  ></div>
+
           <div className={`title ${sidemenu ? "content--shifted" : ""}`}>
               <h1>SummNotes</h1>
           </div>

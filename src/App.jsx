@@ -10,6 +10,7 @@
 
     function App() {
     const [currentUser, setCurrentUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     
 
@@ -22,14 +23,19 @@
     useEffect(() => {
         supabase.auth.getSession().then(({ data }) => {
         setCurrentUser(data.session?.user ?? null);
+        setIsLoading(false);
         });
 
         // Optional: subscribe to auth changes
         const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
         setCurrentUser(session?.user ?? null);
+        setIsLoading(false);
         });
         return () => listener.subscription.unsubscribe();
     }, []);
+        if (isLoading) {
+    return <div className='loading'>Loading...</div>;
+}
 
     return (
         <>
