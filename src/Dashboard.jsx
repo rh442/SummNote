@@ -158,7 +158,7 @@
     } else {
       console.log('Logged out successfully!')
       
-      window.location = './Login'
+         navigate('/Login')
     }
     }
 
