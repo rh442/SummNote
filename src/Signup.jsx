@@ -9,25 +9,32 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  // Step 1: Try signing in first (to detect existing account)
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) {
-      if (error.status === 400 && error.message.includes("User already registered")) {
-        alert("This email is already in use. Please log in instead.");
-      } else {
-        alert(error.message);
-      }
-      return;
-    }
+  if (!signInError) {
+    alert("This email is already registered. Please log in instead.");
+    navigate("/login");
+    return;
+  }
 
-    console.log("Success");
-    navigate("/confirmation");
-  };
+  // Step 2: Continue with sign-up
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  console.log("Signup success");
+  navigate("/confirmation");
+};
+
 
   return (
     <div className="home-container">
@@ -66,3 +73,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
