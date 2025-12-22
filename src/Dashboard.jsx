@@ -63,8 +63,8 @@
           else{
         setLoading(true);
         try{
-        
-        const response = await fetch("http://localhost:3000/summarize", {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const response = await fetch(`${API_URL}/summarize`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: notesInfo.notes })
