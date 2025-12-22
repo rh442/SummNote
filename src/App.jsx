@@ -6,7 +6,7 @@
     import Signup from "./Signup"
     import { Route,Routes } from "react-router-dom";
     import Protected from "./Protected";
-    import { Navigate } from "react-router-dom";
+    import { useNavigate,Navigate } from "react-router-dom";
 
     function App() {
     const [currentUser, setCurrentUser] = useState(null);
