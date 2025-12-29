@@ -1,28 +1,32 @@
 name: Keep Supabase Active
-
 on:
   schedule:
-    # Runs every Monday at 9:00 AM UTC (adjust as needed)
-    - cron: '0 9 * * 1'
-  workflow_dispatch: # Allows manual triggering
+    # Runs every 3 days at 09:00 UTC (safer than weekly)
+    - cron: '0 9 */3 * *'
+  workflow_dispatch:
 
 jobs:
-  ping-supabase:
+  keep-alive:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Ping Supabase
+      - name: Ping Supabase database
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
+          response=$(curl -sS -w "\n%{http_code}" "$SUPABASE_URL/rest/v1/Posts?select=*&limit=1" \
             -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{}' || \
-          curl -X GET "$SUPABASE_URL/rest/v1/" \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Content-Type: application/json"
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" -eq 200 ]; then
+            echo "Successfully pinged Supabase at $(date -u)"
+          else
+            echo "Failed to ping Supabase. HTTP code: $http_code"
+            echo "Response: $response"
+            exit 1
+          fi
       
       - name: Log success
-        run: echo "Supabase pinged successfully at $(date)"
+        run: echo "Supabase keep-alive completed at $(date -u)"
