@@ -1,7 +1,7 @@
 name: Keep Supabase Active
+
 on:
   schedule:
-    # Runs every 3 days at 09:00 UTC (safer than weekly)
     - cron: '0 9 */3 * *'
   workflow_dispatch:
 
@@ -9,24 +9,14 @@ jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase database
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      - name: Install psql
         run: |
-          response=$(curl -sS -w "\n%{http_code}" "$SUPABASE_URL/rest/v1/Posts?select=*&limit=1" \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
-          
-          http_code=$(echo "$response" | tail -n1)
-          
-          if [ "$http_code" -eq 200 ]; then
-            echo "Successfully pinged Supabase at $(date -u)"
-          else
-            echo "Failed to ping Supabase. HTTP code: $http_code"
-            echo "Response: $response"
-            exit 1
-          fi
-      
-      - name: Log success
-        run: echo "Supabase keep-alive completed at $(date -u)"
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Ping Supabase via Postgres
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$DATABASE_URL" -c "SELECT 1;"
+          echo "Supabase DB pinged at $(date -u)"
